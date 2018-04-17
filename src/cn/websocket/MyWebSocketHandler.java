@@ -128,4 +128,8 @@ public class MyWebSocketHandler implements WebSocketHandler {
 			session.sendMessage(message);
 		}
 	}
+	
+	public void sendRandomPosition() throws IOException {
+		
+	}
 }
