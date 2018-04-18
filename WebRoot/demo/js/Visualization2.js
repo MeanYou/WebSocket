@@ -1115,7 +1115,7 @@ function loadMap() {
 			center: [108.5, 33.5],
 			itemStyle : {
 				normal : {
-					areaColor: 'rgba(18, 34, 67,0.7)',
+					areaColor: 'rgba(28, 44, 158, 0.6)',
 					borderColor : '#328CFF',
 					shadowBlur: 100
 				},

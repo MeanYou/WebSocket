@@ -1,7 +1,7 @@
 /* @font-face
 {
 	font-family: hylh;
-	src: url('hylh.ttf');
+	src: url('xhjt.ttf');
 } */
 
 html, body {
@@ -149,6 +149,7 @@ body {
 	width: 60%;
 	color: rgba(255,255,255);
 	font-size: 16px;
+	font-weight: bold;
 	height: 32px;
 	line-height: 32px;
 	/* background: -webkit-linear-gradient(left, rgba(25,255,255,0.7), rgba(25,255,255,0.01)); Safari 5.1 - 6.0
@@ -173,6 +174,27 @@ body {
 .chart-container {
 	width: 100%;
 	height: calc(100% - 40px);
+}
+
+.chart4-img {
+	width: 100%;
+	height: calc(100% - 40px);
+	line-height: calc(100% - 40px);
+	position: absolute;
+	top: 32px;
+	left: 0;
+	vertical-align: middle;
+	text-align: center;
+	display: table;
+}
+
+.chart4-img img {
+	position: absolute;
+	height: 85%;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%,-50%);
+	display:inline-block
 }
 
 .main > div {

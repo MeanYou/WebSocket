@@ -154,7 +154,7 @@ function loadChart1() {
 }
 
 function loadChart2() {
-	var xData = [ 471, 346, 283, 176, 119, 269, 266, 210, 200, 188 ];
+	var xData = [ 471, 346, 283, 176, 119, 110, 101, 72, 70, 52 ];
 	var yData = [ '大众朗逸', ' 别克英朗', '起亚K3', '帕萨特', '华晨中华', '大众捷达', '大众宝来',
 			'吉利帝豪', '本田雅阁', '丰田雷凌' ];
 	var myChart = echarts.init(document.querySelector('.chart2'));
@@ -175,21 +175,23 @@ function loadChart2() {
 		grid : {
 			top : '10%',
 			bottom : '-10%',
-			left : '0%',
+			left : '5%',
 			right : '10%',
 			containLabel : true
 		},
 		xAxis : {
 			type : 'value',
 			boundaryGap : [ 0, 0.01 ],
-			show : false
+			show : false,
+			max: 500
 		},
 		yAxis : {
 			"axisLabel" : {
 				"interval" : 0,
 				color : '#ddd',
 				fontSize : 12,
-				align : 'right'
+				align : 'right',
+				inside: false
 			},
 			type : 'category',
 			data : yData.slice(0, 5).reverse()
@@ -204,7 +206,6 @@ function loadChart2() {
 					show : true,
 					position : 'right',
 					formatter : '{c}'
-
 				}
 			},
 			itemStyle : {
@@ -222,6 +223,21 @@ function loadChart2() {
 	};
 
 	myChart.setOption(option);
+	
+	var index = 1;
+	setInterval(function() {
+		if(index > 4) index = 0;
+		myChart.setOption({
+			yAxis: {
+				data : yData.slice(0+index, 5+index).reverse()
+			},
+			series: [{
+				name : '销量',
+				data: xData.slice(0+index, 5+index).reverse()
+			}]
+		});
+		index++;
+	}, 3000);
 }
 
 function loadChart3() {
@@ -411,7 +427,8 @@ function loadChart4() {
 				text : '东北85%'
 			} ],
 			center : [ '50%', '50%' ],
-			radius : '70%',
+			radius : '65%',
+			max: 100,
 			startAngle : 90,
 			splitNumber : 4,
 			shape : 'polygon',
@@ -421,7 +438,7 @@ function loadChart4() {
 					color : '#ddd',
 					fontSize: 12
 				},
-				padding: -10
+				padding: 0
 			},
 			splitArea: {
 	            show: false
@@ -525,7 +542,8 @@ function loadChart5() {
 			name: '区域库存',
 			type:'pie',
 			radius: ['30%', '70%'],
-			roseType : 'radius',
+			//roseType: 'radius',
+			selectedMode: true,
 			avoidLabelOverlap: false,
 			label: {
 				normal: {
@@ -533,9 +551,8 @@ function loadChart5() {
 					position: 'outside',
 					fontSize: 12,
 					formatter: function(e) {
-						console.log(e);
-						return e.data.name + e.data.value + '辆'
-							//+ '\n' + Math.round(e.percent) + '%'
+						return e.data.name + Math.round(e.percent) + '%'
+							//+ '\n' + e.data.value + '辆' 
 					}
 				}
 			},
@@ -545,7 +562,15 @@ function loadChart5() {
 			},
 			startAngle: 90,
 			minAngle: 25,
-			data: scaleData
+			data: scaleData.map(function(item, index) {
+				return {
+					name: item.name,
+					value: item.value,
+					itemStyle: {
+						radius: ['80%', '80%']
+					}
+				}
+			})
 		}, {
 			name: '总量',
 			type: 'pie',
@@ -971,7 +996,6 @@ function loadMap() {
 	];
 
 	var convertData = function(data) {
-		console.log(data);
 		var res = [];
 		for (var i = 0; i < data.length; i++) {
 			var dataItem = data[i];
@@ -993,7 +1017,6 @@ function loadMap() {
 	var series = [];
 	[ [ '华中', ZZData ] ].forEach(function(
 			item, i) {
-		// console.log(item,i);
 		series.push({
 			name : item[0],
 			type : 'lines',
@@ -1041,7 +1064,8 @@ function loadMap() {
 			coordinateSystem : 'geo',
 			zlevel : 2,
 			rippleEffect : {
-				brushType : 'stroke'
+				brushType : 'fill',
+				scale: 3.5
 			},
 			label : {
 				normal : {
@@ -1049,7 +1073,6 @@ function loadMap() {
 					position : 'right',
 					fontSize: 14,
 					formatter : function(e) {
-						console.log(e)
 						return e.name + '\n' + e.value[2]
 					}
 				}
@@ -1058,8 +1081,8 @@ function loadMap() {
 				var size = val[2] / 100;
 				if(size < 8) {
 					return 8;
-				} else if (size > 16) {
-					return 16;
+				} else if (size > 13) {
+					return 13;
 				} else {
 					return size;
 				}
@@ -1078,10 +1101,42 @@ function loadMap() {
 				}
 			},
 			data : item[1].map(function(dataItem) {
+				var position = '';
+				switch(dataItem[1].name) {
+					case '西北':
+						position = [-27, -27];
+						break;
+					case '西南':
+						position = [-32, -10];
+						break;
+					case '华南':
+						position = [-20, 12];
+						break;
+					case '华东':
+						position = [-10, 13];
+						break;
+					case '华中':
+						position = [25, -13];
+						break;
+					case '华北':
+						position = [-5, -35];
+						break;
+					case '东北':
+						position = [13, -17];
+						break;
+					default:
+						position = 'right';
+					break;
+				}
 				return {
 					name : dataItem[1].name,
 					value : geoCoordMap[dataItem[1].name]
-							.concat([ dataItem[1].value ])
+							.concat([ dataItem[1].value ]),
+					label: {
+						normal : {
+							position : position
+						}
+					}
 				};
 			})
 		});
@@ -1091,7 +1146,6 @@ function loadMap() {
 		tooltip : {
 			trigger : 'item',
 			formatter : function(params, ticket, callback) {
-				console.log(params);
 				if (params.seriesType == "effectScatter") {
 					return params.data.name + "" + params.data.value[2];
 				} else if (params.seriesType == "lines") {
@@ -1116,7 +1170,7 @@ function loadMap() {
 			center: [108.5, 33.5],
 			itemStyle : {
 				normal : {
-					areaColor: 'rgba(18, 34, 67,0.7)',
+					areaColor: 'rgba(39, 88, 156,0.6)',
 					borderColor : '#328CFF',
 					shadowBlur: 100
 				},
