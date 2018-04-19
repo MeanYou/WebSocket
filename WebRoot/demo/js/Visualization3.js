@@ -1,4 +1,5 @@
 //数据展示区1
+var chart1;
 function loadChart1() {
 	var finishedData = [ {
 		"name" : "华中",
@@ -45,7 +46,7 @@ function loadChart1() {
 		"value" : 144
 	} ];
 	var xData = [ '华中', '华北', '华东', '华南', '西南', '西北', '东北' ];
-	var myChart = echarts.init(document.querySelector('.chart1'));
+	chart1 = echarts.init(document.querySelector('.chart1'));
 	var option = {
 		color : [ '#52AAFA', '#FFFFFF' ],
 		tooltip : {
@@ -146,20 +147,23 @@ function loadChart1() {
 			stack : 'total',
 			type : 'bar',
 			barWidth : '30%',
-			data : unfinishedData,
+			data : unfinishedData
 		} ]
 	};
 
-	myChart.setOption(option);
+	chart1.setOption(option);
+}
+function reloadChart1() {
+	chart1.setOption({});
 }
 
+var chart2;
 function loadChart2() {
 	var xData = [ 471, 346, 283, 176, 119, 110, 101, 72, 70, 52 ];
-	var yData = [ '大众朗逸', ' 别克英朗', '起亚K3', '帕萨特', '华晨中华', '大众捷达', '大众宝来',
-			'吉利帝豪', '本田雅阁', '丰田雷凌' ];
-	var myChart = echarts.init(document.querySelector('.chart2'));
+	var yData = [ '大众朗逸', ' 别克英朗', '起亚K3', '帕萨特', '华晨中华', '大众捷达', '大众宝来', '吉利帝豪', '本田雅阁', '丰田雷凌' ];
+	chart2 = echarts.init(document.querySelector('.chart2'));
 
-	option = {
+	var option = {
 		color : [ "#FD666D" ],
 		textStyle : {
 			color : '#fff'
@@ -222,12 +226,12 @@ function loadChart2() {
 		} ]
 	};
 
-	myChart.setOption(option);
+	chart2.setOption(option);
 	
 	var index = 1;
 	setInterval(function() {
 		if(index > 4) index = 0;
-		myChart.setOption({
+		chart2.setOption({
 			yAxis: {
 				data : yData.slice(0+index, 5+index).reverse()
 			},
@@ -239,9 +243,13 @@ function loadChart2() {
 		index++;
 	}, 3000);
 }
+function reloadChart2() {
+	chart2.setOption({});
+}
 
+var chart3;
 function loadChart3() {
-	var myChart = echarts.init(document.querySelector('.chart3'));
+	chart3 = echarts.init(document.querySelector('.chart3'));
 
 	var rendData = [ {
 		"name" : "华中",
@@ -404,11 +412,15 @@ function loadChart3() {
 
 		]
 	};
-	myChart.setOption(option);
+	chart3.setOption(option);
+}
+function reloadChart3() {
+	chart3.setOption({});
 }
 
+var chart4;
 function loadChart4() {
-	var myChart = echarts.init(document.querySelector('.chart4'));
+	chart4 = echarts.init(document.querySelector('.chart4'));
 	var option = {
 		radar : [ {
 			indicator : [ {
@@ -500,11 +512,15 @@ function loadChart4() {
 			} ]
 		} ]
 	};
-	myChart.setOption(option);
+	chart4.setOption(option);
+}
+function reloadChart4() {
+	chart4.setOption({});
 }
 
+var chart5;
 function loadChart5() {
-	var myChart = echarts.init(document.querySelector('.chart5'));
+	chart5 = echarts.init(document.querySelector('.chart5'), null, {renderer: 'svg'});
 	var scaleData = [ {
 		'name' : '华中',
 		'value' : 357
@@ -543,13 +559,14 @@ function loadChart5() {
 			type:'pie',
 			radius: ['30%', '70%'],
 			//roseType: 'radius',
-			selectedMode: true,
+			animation: false,
 			avoidLabelOverlap: false,
 			label: {
 				normal: {
 					show: true,
 					position: 'outside',
 					fontSize: 12,
+					padding: 0,
 					formatter: function(e) {
 						return e.data.name + Math.round(e.percent) + '%'
 							//+ '\n' + e.data.value + '辆' 
@@ -557,8 +574,8 @@ function loadChart5() {
 				}
 			},
 			labelLine: {
-				length: 7,
-				length2: 3
+				length: 10,
+				length2: 7
 			},
 			startAngle: 90,
 			minAngle: 25,
@@ -591,7 +608,53 @@ function loadChart5() {
 			data: [{name: '总量', value: '658'}]
 		}]
 	};
-	myChart.setOption(option);
+	chart5.setOption(option);
+	//var center = [myChart.getWidth()/2, myChart.getHeight()/2];
+	//$('.chart5 svg > path:nth-child(9)').attr('transform', 'translate('+center[0]+','+center[1]+') scale(1.1) translate(-'+center[0]+',-'+center[1]+')');
+	//$('.chart5 svg > path:nth-child(11)').attr('transform', 'translate('+center[0]+','+center[1]+') scale(1.2) translate(-'+center[0]+',-'+center[1]+')');
+	//$('.chart5 svg > path:nth-child(13)').attr('transform', 'translate('+center[0]+','+center[1]+') scale(1.2) translate(-'+center[0]+',-'+center[1]+')');
+	//$('.chart5 svg > path:nth-child(14)').attr('transform', 'translate('+center[0]+','+center[1]+') scale(1.2) translate(-'+center[0]+',-'+center[1]+')');
+
+	chart5.getZr().storage.getDisplayList().forEach(function(item, index) {
+		buildPath(item.path, item.shape, index);
+	});
+}
+function buildPath (ctx, shape, index) {
+	if(!shape || !shape.cx) return;
+	var x = shape.cx;
+	var y = shape.cy;
+	var r0 = Math.max(shape.r0 || 0, 0) * 1.2;
+	var r = Math.max(shape.r, 0) * 1.2;
+	var startAngle = shape.startAngle;
+	var endAngle = shape.endAngle;
+	var clockwise = shape.clockwise;
+
+	var unitX = Math.cos(startAngle);
+	var unitY = Math.sin(startAngle);
+
+	ctx.moveTo(unitX * r0 + x, unitY * r0 + y);
+
+	ctx.lineTo(unitX * r + x, unitY * r + y);
+
+	ctx.arc(x, y, r, startAngle, endAngle, !clockwise);
+
+	ctx.lineTo(
+		Math.cos(endAngle) * r0 + x,
+		Math.sin(endAngle) * r0 + y
+	);
+
+	if (r0 !== 0) {
+		ctx.arc(x, y, r0, endAngle, startAngle, clockwise);
+	}
+
+	ctx.closePath();
+
+	var path = pathDataToString(ctx);
+	if(index+1 === 9 || index+1 === 11 || index+1 === 13 || index+1 === 14)
+		$('.chart5 svg > path:nth-child('+(index+1)+')').attr('d', path);
+}
+function reloadChart5() {
+	chart5.setOption({});
 }
 
 function loadChart6() {
@@ -1166,8 +1229,8 @@ function loadMap() {
 				}
 			},
 			roam : true,
-			zoom: 0.9,
-			center: [108.5, 33.5],
+			zoom: 1,
+			center: [108.5, 34.2],
 			itemStyle : {
 				normal : {
 					areaColor: 'rgba(39, 88, 156,0.6)',
@@ -1193,6 +1256,33 @@ function loadMap() {
 	};
 
 	myChart.setOption(option);
+
+	myChart.on('click', function(e) {
+		var name = e.name;
+		if(e.componentSubType === 'effectScatter') {
+			$.ajax({
+				async: true,
+				url: './data/data.json',
+				type: 'GET',
+				dataType: 'text',
+				success: function(result) {
+					var data = JSON.parse(result);
+					for(var key in data) {
+						if(key === name) {
+							reloadChart1(data[key]);
+							reloadChart2(data[key]);
+							reloadChart3(data[key]);
+							reloadChart4(data[key]);
+							reloadChart5(data[key]);
+						}
+					}
+				},
+				error: function(err) {
+					console.log('请求失败！')
+				}
+			});
+		}
+	});
 }
 
 function timeTicker() {
@@ -1208,6 +1298,130 @@ function timeTicker() {
 		
 		$('.title-time').html(html);
 	}, 1000);
+}
+
+function pathDataToString(path) {
+	var CMD$4 = {"M":1,"L":2,"C":3,"Q":4,"A":5,"Z":6,"R":7};
+	var mathSin$3 = Math.sin;
+	var mathCos$3 = Math.cos;
+	var mathRound = Math.round;
+	var PI$5 = Math.PI;
+	var PI2$7 = Math.PI * 2;
+	var degree = 180 / PI$5;
+	var EPSILON$4 = 1e-4;
+	function round4(val) {
+		return mathRound(val * 1e4) / 1e4;
+	}
+	function isAroundZero$1(val) {
+		return val < EPSILON$4 && val > -EPSILON$4;
+	}
+	var str = [];
+	var data = path.data;
+	var dataLength = path.len();
+	for (var i = 0; i < dataLength;) {
+		var cmd = data[i++];
+		var cmdStr = '';
+		var nData = 0;
+		switch (cmd) {
+			case CMD$4.M:
+				cmdStr = 'M';
+				nData = 2;
+				break;
+			case CMD$4.L:
+				cmdStr = 'L';
+				nData = 2;
+				break;
+			case CMD$4.Q:
+				cmdStr = 'Q';
+				nData = 4;
+				break;
+			case CMD$4.C:
+				cmdStr = 'C';
+				nData = 6;
+				break;
+			case CMD$4.A:
+				var cx = data[i++];
+				var cy = data[i++];
+				var rx = data[i++];
+				var ry = data[i++];
+				var theta = data[i++];
+				var dTheta = data[i++];
+				var psi = data[i++];
+				var clockwise = data[i++];
+
+				var dThetaPositive = Math.abs(dTheta);
+				var isCircle = isAroundZero$1(dThetaPositive - PI2$7)
+					&& !isAroundZero$1(dThetaPositive);
+
+				var large = false;
+				if (dThetaPositive >= PI2$7) {
+					large = true;
+				}
+				else if (isAroundZero$1(dThetaPositive)) {
+					large = false;
+				}
+				else {
+					large = (dTheta > -PI$5 && dTheta < 0 || dTheta > PI$5)
+						=== !!clockwise;
+				}
+
+				var x0 = round4(cx + rx * mathCos$3(theta));
+				var y0 = round4(cy + ry * mathSin$3(theta));
+
+				// It will not draw if start point and end point are exactly the same
+				// We need to shift the end point with a small value
+				// FIXME A better way to draw circle ?
+				if (isCircle) {
+					if (clockwise) {
+						dTheta = PI2$7 - 1e-4;
+					}
+					else {
+						dTheta = -PI2$7 + 1e-4;
+					}
+
+					large = true;
+
+					if (i === 9) {
+						// Move to (x0, y0) only when CMD.A comes at the
+						// first position of a shape.
+						// For instance, when drawing a ring, CMD.A comes
+						// after CMD.M, so it's unnecessary to move to
+						// (x0, y0).
+						str.push('M', x0, y0);
+					}
+				}
+
+				var x = round4(cx + rx * mathCos$3(theta + dTheta));
+				var y = round4(cy + ry * mathSin$3(theta + dTheta));
+
+				// FIXME Ellipse
+				str.push('A', round4(rx), round4(ry),
+					mathRound(psi * degree), +large, +clockwise, x, y);
+				break;
+			case CMD$4.Z:
+				cmdStr = 'Z';
+				break;
+			case CMD$4.R:
+				var x = round4(data[i++]);
+				var y = round4(data[i++]);
+				var w = round4(data[i++]);
+				var h = round4(data[i++]);
+				str.push(
+					'M', x, y,
+					'L', x + w, y,
+					'L', x + w, y + h,
+					'L', x, y + h,
+					'L', x, y
+				);
+				break;
+		}
+		cmdStr && str.push(cmdStr);
+		for (var j = 0; j < nData; j++) {
+			// PENDING With scale
+			str.push(round4(data[i++]));
+		}
+	}
+	return str.join(' ');
 }
 
 loadChart1();
