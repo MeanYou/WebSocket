@@ -44,7 +44,7 @@ function loadChart1() {
 		"value" : 0
 	}, {
 		"name" : "东北",
-		"value" : 0
+		"value" : 4
 	} ];
 	var xData = [ '华中', '华北', '华东', '西北', '西南', '华南', '东北' ];
 	chart1 = echarts.init(document.querySelector('.chart1'));
@@ -201,7 +201,10 @@ function reloadChart1(data) {
 }
 
 var chart2;
+var prevOption2;
+var interval2;
 function loadChart2() {
+	if(interval2) clearInterval(interval2);
 	var xData = [ 471, 346, 283, 176, 119, 110, 101, 72, 70, 52 ];
 	var yData = [ '大众朗逸', ' 别克英朗', '起亚K3', '帕萨特', '华晨中华', '大众捷达', '大众宝来', '吉利帝豪', '本田雅阁', '丰田雷凌' ];
 	chart2 = echarts.init(document.querySelector('.chart2'));
@@ -230,7 +233,7 @@ function loadChart2() {
 			type : 'value',
 			boundaryGap : [ 0, 0.01 ],
 			show : false,
-			max: 500
+			max: xData[0]
 		},
 		yAxis : {
 			"axisLabel" : {
@@ -270,9 +273,10 @@ function loadChart2() {
 	};
 
 	chart2.setOption(option);
+    prevOption2 = chart2.getOption();
 	
 	var index = 1;
-	setInterval(function() {
+	interval2 = setInterval(function() {
 		if(index > 4) index = 0;
 		chart2.setOption({
 			yAxis: {
@@ -286,11 +290,45 @@ function loadChart2() {
 		index++;
 	}, 3000);
 }
-function reloadChart2() {
-	chart2.setOption({});
+function reloadChart2(data) {
+    clearInterval(interval2);
+	var xData = [];
+	var yData = [];
+	data.carSale.forEach(function(item, index) {
+		xData.push(item.sale);
+		yData.push(item.name);
+	});
+	chart2.setOption({
+		xAxis: {
+			max: xData[0]
+		},
+		yAxis: {
+			data: yData.slice(0, 5).reverse()
+		},
+		series: [{
+			name: '销量',
+            data : xData.slice(0, 5).reverse()
+		}]
+	});
+
+    var index = 1;
+    interval2 = setInterval(function() {
+        if(index > 4) index = 0;
+        chart2.setOption({
+            yAxis: {
+                data : yData.slice(0+index, 5+index).reverse()
+            },
+            series: [{
+                name : '销量',
+                data: xData.slice(0+index, 5+index).reverse()
+            }]
+        });
+        index++;
+    }, 3000);
 }
 
 var chart3;
+var prevOption3;
 function loadChart3() {
 	chart3 = echarts.init(document.querySelector('.chart3'));
 
@@ -454,6 +492,7 @@ function loadChart3() {
 		]
 	};
 	chart3.setOption(option);
+    prevOption3 = chart3.getOption();
 }
 function reloadChart3(data) {
 	console.log(data);
@@ -595,7 +634,6 @@ function loadChart4() {
 	};
 	chart4.setOption(option);
 	prevOption4 = chart4.getOption();
-	console.log(prevOption4)
 }
 function reloadChart4(data) {
 	var indicator = [];
@@ -1254,7 +1292,7 @@ function loadMap() {
 						switch(e.name)
 						{
 							case '东北':
-								return '#FF0000';
+								return '#00FFFF';
 							default:
 								return '#00FFFF'
 						}
@@ -1371,7 +1409,11 @@ function loadMap() {
 							reloadChart2(data[key]);
 							reloadChart3(data[key]);
 							reloadChart4(data[key]);
-							//reloadChart5(data[key]);
+                            $('.map-title > ul > li:nth-child(2)').hide();
+                            $('.map-title ul li').css('width', '50%');
+							$('.map-title > ul > li:nth-child(1) > div > span:nth-child(3)').html(data[key].saler);
+                            $('.map-title > ul > li:nth-child(3) > div > span:nth-child(3)').html(data[key].sum);
+                            $('.return').show();
 						}
 					}
 				},
@@ -1382,6 +1424,17 @@ function loadMap() {
 		}
 	});
 }
+$('.return').click(function() {
+	chart1.setOption(prevOption1);
+    loadChart2();
+    chart3.setOption(prevOption3);
+    loadChart4();
+    $('.map-title > ul > li:nth-child(2)').show();
+    $('.map-title ul li').css('width', '33%');
+    $('.map-title > ul > li:nth-child(1) > div > span:nth-child(3)').html('351');
+    $('.map-title > ul > li:nth-child(3) > div > span:nth-child(3)').html('6286');
+    $('.return').hide();
+});
 
 function timeTicker() {
 	setInterval(function() {
