@@ -313,7 +313,7 @@ body {
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	margin-top: -40px;
+	margin-top: -50px;
 	margin-left: -40px;
 	text-align: center;
 	-webkit-animation: imgRotate 5s infinite linear; /*Safari and Chrome*/
@@ -327,7 +327,7 @@ body {
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	margin-top: -40px;
+	margin-top: -50px;
 	margin-left: -40px;
 	text-align: center;
 	vertical-align: middle;
@@ -339,7 +339,7 @@ body {
 	height: 20px;
 	line-height: 20px;
 	position: absolute;
-	top: calc(50% + 40px);
+	top: calc(50% + 30px);
 	left: 50%;
 	margin-left: -40px;
 	text-align: center;

@@ -3,6 +3,9 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+	<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+	<META HTTP-EQUIV="Expires" CONTENT="0">
 
 	<link rel="stylesheet" type="text/css" href="style/Visualization.css">
 
@@ -10,15 +13,19 @@
 </head>
 <body>
 	<div class="title-container">
-		<div class="main-title"><img src="./style/11/大数据中心.png" /></div>
+		<div class="main-title">
+			<img src="./style/11/title-left.png" style="width: 250px;" />
+			<img src="./style/11/大数据中心.png" />
+			<img src="./style/11/title-right.png" style="width: 250px;" />
+		</div>
 		<div class="title-time">2018年4月13日&nbsp;<span>9:26:13</span></div>
-		<div class="main-menu">
+		<!-- <div class="main-menu">
 			<ul>
-				<li><a>首页</a></li>
+				<li><a>指挥中心</a></li>
 				<li><a>车联网大数据</a></li>
 				<li><a>智能选址</a></li>
 			</ul>
-		</div>
+		</div> -->
 	</div>
 	<div class="table-container">
 		<table class="table-main">
@@ -35,23 +42,24 @@
 						<div class="map-title">
 							<ul>
 								<li>
-									<div><img src="./style/11/10.png"><span>&nbsp;加盟商</span><span>&nbsp;280</span><span>&nbsp;个</span></div>
+									<div><img src="./style/11/10.png"><span>&nbsp;加盟商</span><span></span><span>&nbsp;个</span></div>
 								</li>
 								<li>
-									<div><img src="./style/11/10.png"><span>&nbsp;自营展厅</span><span>&nbsp;5</span><span>&nbsp;个</span></div>
+									<div><img src="./style/11/9.png"><span>&nbsp;自营展厅</span><span></span><span>&nbsp;个</span></div>
 								</li>
 								<li>
-									<div><img src="./style/11/10.png"><span>&nbsp;车辆总销量</span><span>&nbsp;6286</span><span>&nbsp;辆</span></div>
+									<div><img src="./style/11/11.png"><span>&nbsp;车辆总销量</span><span></span><span>&nbsp;辆</span></div>
 								</li>
 							</ul>
 						</div>
+						<div class="return"><img src="./style/11/返回.png" /></div>
 						<div class="map-container"></div>
 						<div class="chart7"></div>
 					</div>
 				</td>
 				<td class="sub sub2">
 					<div>
-						<div class="sub-title">热销车型TOP5</div>
+						<div class="sub-title">热销车型TOP10</div>
 						<div class="chart-container chart2"></div>
 					</div>
 				</td>
@@ -64,8 +72,9 @@
 					</div>
 				</td>
 				<td class="sub sub4">
-					<div>
+					<div style="position: relative;">
 						<div class="sub-title">交车及时率</div>
+						<div class="chart4-img"><img src="./style/11/chart4border.png"/></div>
 						<div class="chart-container chart4"></div>
 					</div>
 				</td>
@@ -80,15 +89,24 @@
 				<td class="sub sub6">
 					<div>
 						<div class="sub-title">舆情信息</div>
-						<div class="chart-container chart6"></div>
+						<div class="chart-container chart6">
+							<ul>
+								<li><img  src="./style/11/正面舆情.png"/><span class="yuqing-num" style="color: #5DDA3C;"></span><span class="yuqing-name">正面舆情</span></li>
+								<li><img  src="./style/11/中性舆情.png"/><span class="yuqing-num" style="color: yellow;"></span><span class="yuqing-name">中性舆情</span></li>
+								<li><img  src="./style/11/负面舆情.png"/><span class="yuqing-num" style="color: red;"></span><span class="yuqing-name">负面舆情</span></li>
+							</ul>
+						</div>
 					</div>
 				</td>
 			</tr>
 		</table>
 	</div>
-	<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
-	<script src="js/lib/echarts.min.js"></script>
-	<script src="js/lib/china.js"></script>
-	<script src="js/Visualization.js"></script>
+	<script src="./js/lib/jquery.min.js"></script>
+	<script src="./js/lib/echarts.js"></script>
+	<script src="./js/lib/china2.js"></script>
+	<script src="./js/lib/hicharts.js"></script>
+	<script src="./js/lib/exporting.js"></script>
+	<script src="./js/lib/highcharts-zh_CN.js"></script>
+	<script src="./js/Visualization.js"></script>
 </body>
 </html>

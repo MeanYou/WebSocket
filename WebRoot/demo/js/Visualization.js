@@ -1,53 +1,26 @@
+var status = 'country';
+var globalInterval;
+
+// 标题区域
+function loadTitle(data) {
+	$('.map-title > ul > li:nth-child(1) > div > span:nth-child(3)').html('&nbsp;' + data.saler);
+	$('.map-title > ul > li:nth-child(2) > div > span:nth-child(3)').html('&nbsp;' + data.selfSupprotHall);
+	$('.map-title > ul > li:nth-child(3) > div > span:nth-child(3)').html('&nbsp;' + data.sale);
+}
+
 //数据展示区1
-function loadChart1() {
-	var finishedData = [ {
-		"name" : "华南",
-		"value" : 1020
-	}, {
-		"name" : "华北",
-		"value" : 725
-	}, {
-		"name" : "华东",
-		"value" : 673
-	}, {
-		"name" : "华中",
-		"value" : 486
-	}, {
-		"name" : "东北",
-		"value" : 379
-	}, {
-		"name" : "西北",
-		"value" : 330
-	}, {
-		"name" : "西南",
-		"value" : 262
-	} ];
-	var unfinishedData = [ {
-		"name" : "华南",
-		"value" : 0
-	}, {
-		"name" : "华北",
-		"value" : 275
-	}, {
-		"name" : "华东",
-		"value" : 77
-	}, {
-		"name" : "华中",
-		"value" : 114
-	}, {
-		"name" : "东北",
-		"value" : 0
-	}, {
-		"name" : "西北",
-		"value" : 70
-	}, {
-		"name" : "西南",
-		"value" : 138
-	} ];
-	var xData = [ '华南', '华北', '华东', '华中', '东北', '西北', '西南' ];
-	var myChart = echarts.init(document.querySelector('.chart1'));
+var chart1;
+var prevOption1;
+function loadChart1(data) {
+	console.log(data);
+	var finishedData = data.finishedData;
+	var unfinishedData = data.unfinishedData;
+	var xData = finishedData.map(function(item) {
+		return item.name
+	});
+	if(chart1) chart1.dispose();
+	chart1 = echarts.init(document.querySelector('.chart1'));
 	var option = {
-		// backgroundColor:"#111c4e",
 		color : [ '#52AAFA', '#FFFFFF' ],
 		tooltip : {
 			trigger : 'axis',
@@ -81,13 +54,13 @@ function loadChart1() {
 			right : 0
 		},
 		grid : {
-			left : '0%',
-			right : '0%',
-			bottom : '0%',
+			left : '2%',
+			right : '10%',
+			bottom : '2%',
 			top : '10%',
 			containLabel : true
 		},
-		xAxis : [ {
+		xAxis : {
 			type : 'category',
 			data : xData,
 			axisLabel : {
@@ -101,20 +74,21 @@ function loadChart1() {
 			axisLine : {
 				lineStyle : {
 					color : '#0177d4'
-				}
+				},
+				symbol : [ 'none', 'arrow' ],
+				symbolSize : [ 6, 8 ]
 			},
 			axisTick : {
 				show : false
 			}
-		} ],
+		},
 		yAxis : {
-			name : "销售/辆",
+			//name : "销售/辆",
 			nameTextStyle : {
 				color : '#fff',
 				fontSize : 12
 			},
 			type : 'value',
-			splitNumber : 2,
 			axisLine : {
 				lineStyle : {
 					color : '#36A8C1'
@@ -132,15 +106,15 @@ function loadChart1() {
 					color : '#0177d4'
 				}
 			},
-			interval : 500,
-			minInterval : 500,
-			max : 1100
+			//interval : 1000,
+			//max : 3200,
+			splitNumber: 3
 		},
 		series : [ {
 			name : '已完成销售',
 			stack : 'total',
 			type : 'bar',
-			barWidth : '30%',
+			barWidth : 12,
 			xAxisIndex : 0,
 			yAxisIndex : 0,
 			data : finishedData
@@ -148,49 +122,73 @@ function loadChart1() {
 			name : '未完成销售',
 			stack : 'total',
 			type : 'bar',
-			barWidth : '30%',
-			data : unfinishedData,
+			barWidth : 12,
+			data : unfinishedData
 		} ]
 	};
 
-	myChart.setOption(option);
-
-	// var index = 1;
-	// setInterval(function() {
-	// xData = [];
-	// yData = [];
-	// data.map(function(a, b) {
-	// if (index > 6)
-	// index = 0;
-	// if (b >= index && b < 6 + index) {
-	// xData.push(a.name);
-	// if (a.value === 0) {
-	// yData.push(a.value + min);
-	// } else {
-	// yData.push(a.value);
-	// }
-	// }
-	// });
-	// myChart.setOption({
-	// xAxis : {
-	// data : xData
-	// },
-	// series : [ {
-	// name : '指标',
-	// data : yData
-	// } ]
-	// });
-	// index++;
-	// }, 3000)
+	chart1.setOption(option);
+	prevOption1 = chart1.getOption();
+}
+function reloadChart1(data) {
+	console.log(data);
+	var provinceData = data.province;
+	var xData = [];
+	var finishedData = [];
+	var unfinishedData = [];
+	for(var key in provinceData) {
+		var detail = provinceData[key];
+		finishedData.push({
+			name: key,
+			value: detail.sale,
+			unfinishedValue: detail.unsale
+		});
+	}
+	finishedData.sort(function(a, b) {
+		return b.value - a.value;
+	});
+	finishedData.forEach(function(item, index) {
+		xData.push(item.name);
+		unfinishedData.push({
+			name: item.name,
+			value: item.unfinishedValue
+		})
+	});
+	chart1.setOption({
+		xAxis: {
+			data: xData
+		},
+		yAxis: {
+			//interval: 30,
+			//max: Math.ceil(finishedData[0]*1.1)
+		},
+		series: [{
+			name: '已完成销售',
+			data: finishedData
+		}, {
+			name: '未完成销售',
+			data: unfinishedData
+		}]
+	});
 }
 
-function loadChart2() {
-	var xData = [ 471, 422, 410, 376, 346, 269, 266, 210, 200, 188 ];
-	var yData = [ '大众朗逸', ' 丰田卡罗拉', '日产轩逸', '大众速腾', '别克英朗', '大众捷达', '大众宝来',
-			'吉利帝豪', '本田雅阁', '丰田雷凌' ];
-	var myChart = echarts.init(document.querySelector('.chart2'));
+var chart2;
+var prevOption2;
+var interval2;
+function loadChart2(data) {
+	console.log(data.rank);
+	var rank = data.rank;
+	if(interval2) clearInterval(interval2);
+	var xData = rank.map(function(item) {
+		return item.sale;
+	});
+	var yData = rank.map(function(item) {
+		return item.name;
+	});
+	if(chart2) chart2.dispose();
+	chart2 = echarts.init(document.querySelector('.chart2'));
 
-	option = {
+	var option = {
 		color : [ "#FD666D" ],
 		textStyle : {
 			color : '#fff'
@@ -205,22 +203,24 @@ function loadChart2() {
 
 		grid : {
 			top : '10%',
-			bottom : '-10%',
-			left : '0%',
-			right : '10%',
+			bottom : '-8%',
+			left : '5%',
+			right : '12%',
 			containLabel : true
 		},
 		xAxis : {
 			type : 'value',
 			boundaryGap : [ 0, 0.01 ],
-			show : false
+			show : false,
+			max: xData[0]
 		},
 		yAxis : {
 			"axisLabel" : {
 				"interval" : 0,
 				color : '#ddd',
 				fontSize : 12,
-				align : 'right'
+				align : 'right',
+				inside: false
 			},
 			type : 'category',
 			data : yData.slice(0, 5).reverse()
@@ -228,14 +228,13 @@ function loadChart2() {
 		series : [ {
 			name : '销量',
 			type : 'bar',
-			barCategoryGap : '30%',
+			barCategoryGap : '50%',
 			data : xData.slice(0, 5).reverse(),
 			label : {
 				normal : {
 					show : true,
 					position : 'right',
 					formatter : '{c}'
-
 				}
 			},
 			itemStyle : {
@@ -246,55 +245,79 @@ function loadChart2() {
 					}, {
 						offset : 1,
 						color : '#B4F7FE'
-					} ]),
+					} ])
 				}
 			}
 		} ]
 	};
 
-	myChart.setOption(option);
+	chart2.setOption(option);
+    prevOption2 = chart2.getOption();
+	
+	var index = 1;
+	interval2 = setInterval(function() {
+		if(index > 4) index = 0;
+		chart2.setOption({
+			yAxis: {
+				data : yData.slice(0+index, 5+index).reverse()
+			},
+			series: [{
+				name : '销量',
+				data: xData.slice(0+index, 5+index).reverse()
+			}]
+		});
+		index++;
+	}, 3000);
+}
+function reloadChart2(data) {
+    clearInterval(interval2);
+	var xData = [];
+	var yData = [];
+	data.carSale.forEach(function(item, index) {
+		xData.push(item.sale);
+		yData.push(item.name);
+	});
+	chart2.setOption({
+		xAxis: {
+			max: xData[0]
+		},
+		yAxis: {
+			data: yData.slice(0, 5).reverse()
+		},
+		series: [{
+			name: '销量',
+            data : xData.slice(0, 5).reverse()
+		}]
+	});
 
-	// var i = 4;
-	// setInterval(function() {
-	// if (i === data.length)
-	// i = 0;
-	// showData.shift();
-	// showData.push(data[i]);
-	// i++;
-	// myChart.setOption({
-	// series : [ {
-	// name : '2011年',
-	// data : showData
-	// } ]
-	// });
-	// }, 3000);
+    var index = 1;
+    interval2 = setInterval(function() {
+        if(index > 4) index = 0;
+        chart2.setOption({
+            yAxis: {
+                data : yData.slice(0+index, 5+index).reverse()
+            },
+            series: [{
+                name : '销量',
+                data: xData.slice(0+index, 5+index).reverse()
+            }]
+        });
+        index++;
+    }, 3000);
 }
 
-function loadChart3() {
-	var myChart = echarts.init(document.querySelector('.chart3'));
+var chart3;
+var prevOption3;
+function loadChart3(data) {
+	var rendData = data.rendData;
+	var fullData = data.fullData;
+	if(chart3) chart3.dispose();
+	chart3 = echarts.init(document.querySelector('.chart3'));
 
-	var finishedData = [ {
-		"name" : "华南",
-		"value" : 1020
-	}, {
-		"name" : "华北",
-		"value" : 725
-	}, {
-		"name" : "华东",
-		"value" : 673
-	}, {
-		"name" : "华中",
-		"value" : 486
-	}, {
-		"name" : "东北",
-		"value" : 379
-	}, {
-		"name" : "西北",
-		"value" : 330
-	}, {
-		"name" : "西南",
-		"value" : 262
-	} ];
+	var sumData = [];
+	for(var i = 0; i < 5; i++) {
+		sumData.push(rendData[i].value + fullData[i].value)
+	}
 	var option = {
 		legend : {
 			right : 0,
@@ -309,9 +332,9 @@ function loadChart3() {
 		},
 		grid : {
 			top : '15%',
-			left : '0%',
+			left : '3%',
 			right : '10%',
-			bottom : '0%',
+			bottom : '2%',
 			containLabel : true
 		},
 		tooltip : {
@@ -319,6 +342,11 @@ function loadChart3() {
 			trigger : 'axis',
 			axisPointer : { // 坐标轴指示器，坐标轴触发有效
 				type : 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+			},
+			formatter: function(e) {
+				var result = e[1].seriesName + '：' + (e[1].value - e[0].value);
+				result += '<br/>' + e[0].seriesName + '：' + e[0].value;
+				return result;
 			}
 		},
 		xAxis : {
@@ -340,7 +368,7 @@ function loadChart3() {
 			splitLine : {
 				show : false
 			},
-			interval : 300
+			splitNumber: 3
 		},
 		yAxis : [ {
 			type : 'category',
@@ -377,7 +405,7 @@ function loadChart3() {
 				show : false
 			},
 			data : [ '华中', '华北', '华东', '华南', '西南' ].reverse()
-		},
+		}
 
 		],
 		series : [ {
@@ -390,14 +418,11 @@ function loadChart3() {
 					color : '#277ace',
 					barBorderRadius : 50,
 					borderWidth : 0,
-					borderColor : '#333',
+					borderColor : '#333'
 				}
 			},
-			barGap : '0%',
-			barCategoryGap : '50%',
-			data : finishedData.slice(0, 5).map(function(item, index) {
-				return item.value
-			}).reverse()
+			barWidth : 9,
+			data : sumData.reverse()
 		}, {
 			name : '全款',
 			type : 'bar',
@@ -407,42 +432,81 @@ function loadChart3() {
 					color : '#5de3e1',
 					barBorderRadius : 50,
 					borderWidth : 0,
-					borderColor : '#333',
+					borderColor : '#333'
 				}
 			},
-			barGap : '0%',
-			barCategoryGap : '50%',
-			data : finishedData.slice(0, 5).map(function(item, index) {
-				return Math.round(item.value / 2)
-			}).reverse()
+			barWidth : 9,
+			data : fullData.reverse()
 		}
 
 		]
 	};
-	myChart.setOption(option);
+	chart3.setOption(option);
+    prevOption3 = chart3.getOption();
+}
+function reloadChart3(data) {
+	console.log(data);
+	var sumData = [];
+	var fullData = [];
+	var yData = [];
+	var provinceData = data.province;
+	var i = 0;
+	for(var key in provinceData) {
+		if (i < 5) {
+			var detail = provinceData[key];
+			sumData.push({
+				name: key,
+				value: detail.sale,
+				full: detail.full
+			});
+		}
+		i++;
+	}
+	sumData.sort(function(a, b) {
+		return a.value - b.value;
+	});
+	sumData.forEach(function(item, index) {
+		fullData.push({
+			name: item.name,
+			value: item.full
+		});
+		yData.push(item.name);
+	});
+	chart3.setOption({
+		yAxis: [{
+			data: yData
+		}, {
+			data: yData
+		}],
+		series: [{
+			name: '租赁',
+			data: sumData
+		}, {
+			name: '全款',
+			data: fullData
+		}]
+	});
 }
 
-function loadChart4() {
-	var myChart = echarts.init(document.querySelector('.chart4'));
+var chart4;
+var prevOption4;
+function loadChart4(data) {
+	var indicator = data.map(function(item) {
+		return {
+			text: item.name + item.percent + '%'
+		}
+	});
+	var radarData = data.map(function(item) {
+		return item.percent;
+	});
+	
+	if(chart4) chart4.dispose();
+	chart4 = echarts.init(document.querySelector('.chart4'));
 	var option = {
 		radar : [ {
-			indicator : [ {
-				text : '华中'
-			}, {
-				text : '华北'
-			}, {
-				text : '华东'
-			}, {
-				text : '华南'
-			}, {
-				text : '西南'
-			}, {
-				text : '西北'
-			}, {
-				text : '东北'
-			} ],
+			indicator : indicator,
 			center : [ '50%', '50%' ],
-			radius : '50%',
+			radius : '65%',
 			startAngle : 90,
 			splitNumber : 4,
 			shape : 'polygon',
@@ -451,7 +515,8 @@ function loadChart4() {
 				textStyle : {
 					color : '#ddd',
 					fontSize: 12
-				}
+				},
+				padding: 0
 			},
 			splitArea: {
 	            show: false
@@ -461,6 +526,9 @@ function loadChart4() {
 	                color: '#449cff'
 	            }
 	        },
+			axisLabel: {
+				margin: 0
+			},
 			splitLine : {
 				lineStyle : {
 					color : 'rgba(255, 255, 255, 0.5)'
@@ -498,8 +566,8 @@ function loadChart4() {
 	            }
 	        },
 			data : [ {
-				value : [ 92, 95, 87, 82, 90, 91, 88 ],
-				name : '',
+				value : radarData,
+				name : '及时率',
 				symbol: 'none',
 				lineStyle : {
 					normal : {
@@ -509,116 +577,40 @@ function loadChart4() {
 				}
 			} ]
 		} ]
+	};
+	chart4.setOption(option);
+	prevOption4 = chart4.getOption();
+}
+function reloadChart4(data) {
+	var indicator = [];
+	var value = [];
+	var provinceData = data.province;
+	for(var key in provinceData) {
+		var detail = provinceData[key];
+		if(detail.inTime === '100%') continue;
+		indicator.push({
+			text: key + detail.inTime
+		});
+		value.push(parseInt(detail.inTime));
 	}
-	myChart.setOption(option);
+	chart4.clear();
+	var newOption = prevOption4;
+	newOption.radar[0].indicator = indicator;
+	newOption.series[0].data[0].value = value;
+	chart4.setOption(newOption);
 }
 
-function loadChart5() {
-	var myChart = echarts.init(document.querySelector('.chart5'));
-	var scaleData = [ {
-		'name' : '华中',
-		'value' : 220
-	}, {
-		'name' : '华北',
-		'value' : 180
-	}, {
-		'name' : '华东',
-		'value' : 99
-	}, {
-		'name' : '华南',
-		'value' : 66
-	}, {
-		'name' : '西南',
-		'value' : 48
-	}, {
-		'name' : '西北',
-		'value' : 77
-	}, {
-		'name' : '东北',
-		'value' : 86
-	} ];
-	var rich = {
-		white : {
-			color : '#ddd',
-			align : 'center',
-			padding : [ 5, 0 ]
-		}
-	};
-	var placeHolderStyle = {
-		normal : {
-			label : {
-				show : false
-			},
-			labelLine : {
-				show : false
-			},
-			color : 'rgba(0, 0, 0, 0)',
-			borderColor : 'rgba(0, 0, 0, 0)',
-			borderWidth : 0
-		}
-	};
-	var data = [];
-	for (var i = 0; i < scaleData.length; i++) {
-		data.push({
-			value : scaleData[i].value,
-			name : scaleData[i].name,
-			itemStyle : {
-				normal : {
-					borderWidth : 5,
-					shadowBlur : 30,
-					borderColor : new echarts.graphic.LinearGradient(0, 0, 1,
-							1, [ {
-								offset : 0,
-								color : '#7777eb'
-							}, {
-								offset : 1,
-								color : '#70ffac'
-							} ]),
-					shadowColor : 'rgba(142, 152, 241, 0.6)'
-				}
-			}
-		}, {
-			value : 10,
-			name : '',
-			itemStyle : placeHolderStyle
-		});
-	}
-	var seriesObj = [ {
-		name : '',
-		type : 'pie',
-		clockWise : false,
-		radius : [ '45%', '50%' ],
-		hoverAnimation : false,
-		itemStyle : {
-			normal : {
-				label : {
-					show : true,
-					position : 'outside',
-					color : '#ddd',
-					formatter : function(params) {
-						var percent = 0;
-						var total = 0;
-						for (var i = 0; i < scaleData.length; i++) {
-							total += scaleData[i].value;
-						}
-						percent = ((params.value / total) * 100).toFixed(0);
-						if (params.name !== '') {
-							return params.name + '{white|' + '：' + percent
-									+ '%}';
-						} else {
-							return '';
-						}
-					},
-					rich : rich
-				},
-				labelLine : {
-					show : true
-				}
-			}
-		},
-		data : data
-	} ];
+var chart5;
+function loadChart5(data) {
+	if(chart5) chart5.dispose();
+	chart5 = echarts.init(document.querySelector('.chart5'), null, {renderer: 'svg'});
+	var scaleData = data;
+	var sum = 0;
+	data.forEach(function(item) {
+		sum += item.value;
+	});
 	var option = {
+		color: ['#5AB1FE', '#B5F7FD', '#54D7FF', '#64A5FF', '#6EBBFF', '#C0FFFF', '#8DAFFF'],
 		tooltip : {
 			show : false
 		},
@@ -628,225 +620,131 @@ function loadChart5() {
 		toolbox : {
 			show : false
 		},
-		series : seriesObj
+		series : [{
+			name: '区域库存',
+			type:'pie',
+			radius: ['30%', '70%'],
+			//roseType: 'radius',
+			animation: false,
+			avoidLabelOverlap: false,
+			label: {
+				normal: {
+					show: true,
+					position: 'outside',
+					fontSize: 12,
+					padding: 0,
+					formatter: function(e) {
+						return e.data.name + Math.round(e.percent) + '%'
+							//+ '\n' + e.data.value + '辆' 
+					}
+				}
+			},
+			labelLine: {
+				length: 10,
+				length2: 7
+			},
+			startAngle: 90,
+			minAngle: 25,
+			data: scaleData.map(function(item, index) {
+				return {
+					name: item.name,
+					value: item.value,
+					itemStyle: {
+						radius: ['80%', '80%']
+					}
+				}
+			})
+		}, {
+			name: '总量',
+			type: 'pie',
+			radius: ['50%', '50%'],
+			avoidLabelOverlap: false,
+			label: {
+				normal: {
+					show: true,
+					position: 'center',
+					textStyle: {
+						fontSize: '12',
+						fontWeight: 'bold',
+						color: '#ddd'
+					},
+					formatter: '{c}\n辆'
+				}
+			},
+			data: [{name: '总量', value: sum}]
+		}]
+	};
+	chart5.setOption(option);
+	//var center = [myChart.getWidth()/2, myChart.getHeight()/2];
+	//$('.chart5 svg > path:nth-child(9)').attr('transform', 'translate('+center[0]+','+center[1]+') scale(1.1) translate(-'+center[0]+',-'+center[1]+')');
+	//$('.chart5 svg > path:nth-child(11)').attr('transform', 'translate('+center[0]+','+center[1]+') scale(1.2) translate(-'+center[0]+',-'+center[1]+')');
+	//$('.chart5 svg > path:nth-child(13)').attr('transform', 'translate('+center[0]+','+center[1]+') scale(1.2) translate(-'+center[0]+',-'+center[1]+')');
+	//$('.chart5 svg > path:nth-child(14)').attr('transform', 'translate('+center[0]+','+center[1]+') scale(1.2) translate(-'+center[0]+',-'+center[1]+')');
+
+	chart5.getZr().storage.getDisplayList().forEach(function(item, index) {
+		buildPath(item.path, item.shape, index);
+	});
+}
+function buildPath (ctx, shape, index) {
+	if(!shape || !shape.cx) return;
+	var x = shape.cx;
+	var y = shape.cy;
+	var r0 = Math.max(shape.r0 || 0, 0) * 1.2;
+	var r = Math.max(shape.r, 0) * 1.2;
+	var startAngle = shape.startAngle;
+	var endAngle = shape.endAngle;
+	var clockwise = shape.clockwise;
+
+	var unitX = Math.cos(startAngle);
+	var unitY = Math.sin(startAngle);
+
+	ctx.moveTo(unitX * r0 + x, unitY * r0 + y);
+
+	ctx.lineTo(unitX * r + x, unitY * r + y);
+
+	ctx.arc(x, y, r, startAngle, endAngle, !clockwise);
+
+	ctx.lineTo(
+		Math.cos(endAngle) * r0 + x,
+		Math.sin(endAngle) * r0 + y
+	);
+
+	if (r0 !== 0) {
+		ctx.arc(x, y, r0, endAngle, startAngle, clockwise);
 	}
-	myChart.setOption(option);
+
+	ctx.closePath();
+
+	var path = pathDataToString(ctx);
+	if(index+1 === 9 || index+1 === 11 || index+1 === 13 || index+1 === 14)
+		$('.chart5 svg > path:nth-child('+(index+1)+')').attr('d', path);
+}
+function reloadChart5() {
+	chart5.setOption({});
 }
 
-function loadChart6() {
-	var myChart = echarts.init(document.querySelector('.chart6'));
-
-	var option = {
-		    series: [
-		        {
-		            name: '正面舆情',
-		            type: 'pie',
-		            radius: ['45%', '55%'],
-		            center: ['16.66%', '50%'],
-		            startAngle: 225,
-		            color: [new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-		                offset: 0,
-		                color: '#00a2ff'
-		            }, {
-		                offset: 1,
-		                color: '#70ffac'
-		            }]), "transparent"],
-		            labelLine: {
-		                normal: {
-		                    show: false
-		                }
-		            },
-		            label: {
-		                    normal: {
-		                        position: 'center'
-		                    }
-		                },
-		            data: [{
-		                value: 75,
-		                 name: '',
-		                    label: {
-		                        normal: {
-		                            formatter: '正面舆情',
-		                            textStyle: {
-		                                color: '#fff',
-		                                fontSize: 14,
-		                                fontWeight: 'bold'
-		                            }
-		                        }
-		                    }
-		            }, {
-		                value: 25,
-		                name: '%',
-		                    label: {
-		                        normal: {
-		                            formatter: '\n221',
-		                            textStyle: {
-		                                color: '#007ac6',
-		                                fontSize: 14,
-		                                fontWeight: 'bold'
-		                            }
-		                        }
-		                    }
-		            },
-		            {
-		                value: 0,
-		                name: '%',
-		                    label: {
-		                        normal: {
-		                            formatter: '件',
-		                            textStyle: {
-		                                color: '#fff',
-		                                fontSize: 14
-		                            }
-		                        }
-		                    }
-		            }]
-		        },
-		        {
-		            name: ' 中性舆情',
-		            type: 'pie',
-		            radius: ['45%', '55%'],
-		            center: ['50%', '50%'],
-		            startAngle: 225,
-		            color: [new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-		                offset: 0,
-		                color: '#00a2ff'
-		            }, {
-		                offset: 1,
-		                color: '#70ffac'
-		            }]), "transparent"],
-		            labelLine: {
-		                normal: {
-		                    show: false
-		                }
-		            },
-		            label: {
-		                    normal: {
-		                        position: 'center'
-		                    }
-		                },
-		            data: [{
-		                value: 75,
-		                 name: '中性舆情',
-		                    label: {
-		                        normal: {
-		                            formatter: '中性舆情',
-		                            textStyle: {
-		                                color: '#fff',
-		                                fontSize: 14,
-		                                fontWeight: 'bold'
-		                            }
-		                        }
-		                    }
-		            }, {
-		                value: 25,
-		                name: '%',
-		                    label: {
-		                        normal: {
-		                            formatter: '\n43',
-		                            textStyle: {
-		                                color: '#007ac6',
-		                                fontSize: 14,
-		                                fontWeight: 'bold'
-		                            }
-		                        }
-		                    }
-		            },
-		            {
-		                value: 0,
-		                name: '%',
-		                    label: {
-		                        normal: {
-		                            formatter: '件',
-		                            textStyle: {
-		                                color: '#fff',
-		                                fontSize: 14
-
-		                            }
-		                        }
-		                    }
-		            }]
-		        },
-		        {
-		            name: ' 负面舆情',
-		            type: 'pie',
-		            radius: ['45%', '55%'],
-		            center: ['83.33%', '50%'],
-		            startAngle: 225,
-		            labelLine: {
-		                normal: {
-		                    show: false
-		                }
-		            },
-		            label: {
-		                    normal: {
-		                        position: 'center'
-		                    }
-		                },
-		            data: [{
-		                value: 75,
-		                "itemStyle": {
-		                    "normal": {
-		                        "color": new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-		                            "offset": 0,
-		                            "color": '#f125ff'
-		                        }, {
-		                            "offset": 1,
-		                            "color": '#2dcbff'
-		                        }]),
-		                    }
-		                },
-		                 name: '负面舆情',
-		                    label: {
-		                        normal: {
-		                            formatter: '负面舆情',
-		                            textStyle: {
-		                                color: '#fff',
-		                                fontSize: 14,
-		                                fontWeight: 'bold'
-		                            }
-		                        }
-		                    }
-		            }, {
-		                value: 25,
-		                name: '%',
-		                    label: {
-		                        normal: {
-		                            formatter: '\n9',
-		                            textStyle: {
-		                                color: '#f125ff',
-		                                fontSize: 14,
-		                                fontWeight: 'bold'
-		                            }
-		                        }
-		                    }
-		            },
-		            {
-		                value: 0,
-		                name: '%',
-		                    label: {
-		                        normal: {
-		                            formatter: '件',
-		                            textStyle: {
-		                                color: '#fff',
-		                                fontSize: 14
-		                            }
-		                        }
-		                    }
-		            }]
-		        }
-		    ]
-		};
-
-	myChart.setOption(option);
+function loadChart6(data) {
+	$('.yuqing-num:eq(0)').html(data.positive);
+	$('.yuqing-num:eq(1)').html(data.neutral);
+	$('.yuqing-num:eq(2)').html(data.negative);
 }
 
-function loadChart7() {
-	var myChart = echarts.init(document.querySelector('.chart7'));
+var chart7;
+function loadChart7(data) {
+	if(chart7) chart7.dispose();
+	chart7 = echarts.init(document.querySelector('.chart7'));
 
-	var xData = ['4.1', '4.2', '4.3', '4.4', '4.5', '4.6', '4.7', '4.8'];
-	var fullData = [31, 39, 23, 29, 37, 34, 45, 41];
-	var stageData = [19, 21, 18, 22, 22, 26, 30, 27];
+	var today = new Date();
+	var xData = [];
+	for(var i = 0; i < 8; i++) {
+		today.setDate(today.getDate() - 1);
+		var month = today.getMonth() + 1;
+		var date = today.getDate();
+		xData.push(month + '.' + date);
+	}
+	xData.reverse();
+	var fullData = data.fullSale;
+	var stageData = data.stageSale;
 	var option = {
 	    tooltip: {
 	        trigger: 'axis',
@@ -862,6 +760,7 @@ function loadChart7() {
 	        itemHeight: 5,
 	        itemGap: 13,
 	        data: ['全款销量', '租赁销量'],
+			top: '-5%',
 	        right: '4%',
 	        textStyle: {
 	            fontSize: 12,
@@ -869,7 +768,7 @@ function loadChart7() {
 	        }
 	    },
 	    grid: {
-	    	top: '10%',
+	    	top: '20%',
 	        left: '3%',
 	        right: '4%',
 	        bottom: '10%',
@@ -878,6 +777,10 @@ function loadChart7() {
 	    xAxis: {
 	        type: 'category',
 	        boundaryGap: false,
+			axisLabel: {
+				color: '#ddd',
+				fontSize: 12
+			},
 	        axisLine: {
 	            lineStyle: {
 	                color: '#57617B'
@@ -887,7 +790,7 @@ function loadChart7() {
 	    },
 	    yAxis: {
 	        type: 'value',
-	        name: '销量/台',
+//	        name: '销量/台',
 	        axisTick: {
 	            show: true,
 	            inside: true
@@ -899,8 +802,9 @@ function loadChart7() {
 	        },
 	        axisLabel: {
 	            margin: 10,
+				color: '#ddd',
 	            textStyle: {
-	                fontSize: 14
+	                fontSize: 12
 	            }
 	        },
 	        splitLine: {
@@ -908,7 +812,8 @@ function loadChart7() {
 	            lineStyle: {
 	                color: '#57617B'
 	            }
-	        }
+	        },
+			interval: 20
 	    },
 	    series: [{
 	        name: '全款销量',
@@ -916,7 +821,7 @@ function loadChart7() {
 	        smooth: false,
 	        symbol: 'circle',
 	        symbolSize: 5,
-	        showSymbol: false,
+	        showSymbol: true,
 	        lineStyle: {
 	            normal: {
 	                width: 1
@@ -938,9 +843,8 @@ function loadChart7() {
 	        itemStyle: {
 	            normal: {
 	                color: 'rgb(54, 86, 213)',
-	                borderColor: 'rgba(54, 86, 213,0.27)',
-	                borderWidth: 12
-
+	                borderColor: 'rgba(54, 86, 213,0.4)',
+	                borderWidth: 8
 	            }
 	        },
 	        data: fullData
@@ -950,7 +854,7 @@ function loadChart7() {
 	        smooth: false,
 	        symbol: 'circle',
 	        symbolSize: 5,
-	        showSymbol: false,
+	        showSymbol: true,
 	        lineStyle: {
 	            normal: {
 	                width: 1
@@ -972,316 +876,40 @@ function loadChart7() {
 	        itemStyle: {
 	            normal: {
 	                color: 'rgb(0,136,212)',
-	                borderColor: 'rgba(0,136,212,0.2)',
-	                borderWidth: 12
-
+	                borderColor: 'rgba(0,136,212,0.4)',
+	                borderWidth: 8
 	            }
 	        },
 	        data: stageData
 	    } ]
 	};
 
-	myChart.setOption(option);
+	chart7.setOption(option);
 }
 
-function loadMap() {
-	var myChart = echarts.init(document.querySelector('.map-container'));
+var chart8;
+function loadMap(data) {
+	if(chart8) chart8.dispose();
+	chart8 = echarts.init(document.querySelector('.map-container'));
 
 	var geoCoordMap = {
-		'上海' : [ 121.4648, 31.2891 ],
-		'东莞' : [ 113.8953, 22.901 ],
-		'东营' : [ 118.7073, 37.5513 ],
-		'中山' : [ 113.4229, 22.478 ],
-		'临汾' : [ 111.4783, 36.1615 ],
-		'临沂' : [ 118.3118, 35.2936 ],
-		'丹东' : [ 124.541, 40.4242 ],
-		'丽水' : [ 119.5642, 28.1854 ],
-		'乌鲁木齐' : [ 87.9236, 43.5883 ],
-		'佛山' : [ 112.8955, 23.1097 ],
-		'保定' : [ 115.0488, 39.0948 ],
-		'兰州' : [ 103.5901, 36.3043 ],
-		'包头' : [ 110.3467, 41.4899 ],
-		'北京' : [ 116.4551, 40.2539 ],
-		'北海' : [ 109.314, 21.6211 ],
-		'南京' : [ 118.8062, 31.9208 ],
-		'南宁' : [ 108.479, 23.1152 ],
-		'南昌' : [ 116.0046, 28.6633 ],
-		'南通' : [ 121.1023, 32.1625 ],
-		'厦门' : [ 118.1689, 24.6478 ],
-		'台州' : [ 121.1353, 28.6688 ],
-		'合肥' : [ 117.29, 32.0581 ],
-		'呼和浩特' : [ 111.4124, 40.4901 ],
-		'咸阳' : [ 108.4131, 34.8706 ],
-		'哈尔滨' : [ 127.9688, 45.368 ],
-		'唐山' : [ 118.4766, 39.6826 ],
-		'嘉兴' : [ 120.9155, 30.6354 ],
-		'大同' : [ 113.7854, 39.8035 ],
-		'大连' : [ 122.2229, 39.4409 ],
-		'天津' : [ 117.4219, 39.4189 ],
-		'太原' : [ 112.3352, 37.9413 ],
-		'威海' : [ 121.9482, 37.1393 ],
-		'宁波' : [ 121.5967, 29.6466 ],
-		'宝鸡' : [ 107.1826, 34.3433 ],
-		'宿迁' : [ 118.5535, 33.7775 ],
-		'常州' : [ 119.4543, 31.5582 ],
-		'广州' : [ 113.5107, 23.2196 ],
-		'廊坊' : [ 116.521, 39.0509 ],
-		'延安' : [ 109.1052, 36.4252 ],
-		'张家口' : [ 115.1477, 40.8527 ],
-		'徐州' : [ 117.5208, 34.3268 ],
-		'德州' : [ 116.6858, 37.2107 ],
-		'惠州' : [ 114.6204, 23.1647 ],
-		'成都' : [ 103.9526, 30.7617 ],
-		'扬州' : [ 119.4653, 32.8162 ],
-		'承德' : [ 117.5757, 41.4075 ],
-		'拉萨' : [ 91.1865, 30.1465 ],
-		'无锡' : [ 120.3442, 31.5527 ],
-		'日照' : [ 119.2786, 35.5023 ],
-		'昆明' : [ 102.9199, 25.4663 ],
-		'杭州' : [ 119.5313, 29.8773 ],
-		'枣庄' : [ 117.323, 34.8926 ],
-		'柳州' : [ 109.3799, 24.9774 ],
-		'株洲' : [ 113.5327, 27.0319 ],
-		'武汉' : [ 114.3896, 30.6628 ],
-		'汕头' : [ 117.1692, 23.3405 ],
-		'江门' : [ 112.6318, 22.1484 ],
-		'沈阳' : [ 123.1238, 42.1216 ],
-		'沧州' : [ 116.8286, 38.2104 ],
-		'河源' : [ 114.917, 23.9722 ],
-		'泉州' : [ 118.3228, 25.1147 ],
-		'泰安' : [ 117.0264, 36.0516 ],
-		'泰州' : [ 120.0586, 32.5525 ],
-		'济南' : [ 117.1582, 36.8701 ],
-		'济宁' : [ 116.8286, 35.3375 ],
-		'海口' : [ 110.3893, 19.8516 ],
-		'淄博' : [ 118.0371, 36.6064 ],
-		'淮安' : [ 118.927, 33.4039 ],
-		'深圳' : [ 114.5435, 22.5439 ],
-		'清远' : [ 112.9175, 24.3292 ],
-		'温州' : [ 120.498, 27.8119 ],
-		'渭南' : [ 109.7864, 35.0299 ],
-		'湖州' : [ 119.8608, 30.7782 ],
-		'湘潭' : [ 112.5439, 27.7075 ],
-		'滨州' : [ 117.8174, 37.4963 ],
-		'潍坊' : [ 119.0918, 36.524 ],
-		'烟台' : [ 120.7397, 37.5128 ],
-		'玉溪' : [ 101.9312, 23.8898 ],
-		'珠海' : [ 113.7305, 22.1155 ],
-		'盐城' : [ 120.2234, 33.5577 ],
-		'盘锦' : [ 121.9482, 41.0449 ],
-		'石家庄' : [ 114.4995, 38.1006 ],
-		'福州' : [ 119.4543, 25.9222 ],
-		'秦皇岛' : [ 119.2126, 40.0232 ],
-		'绍兴' : [ 120.564, 29.7565 ],
-		'聊城' : [ 115.9167, 36.4032 ],
-		'肇庆' : [ 112.1265, 23.5822 ],
-		'舟山' : [ 122.2559, 30.2234 ],
-		'苏州' : [ 120.6519, 31.3989 ],
-		'莱芜' : [ 117.6526, 36.2714 ],
-		'菏泽' : [ 115.6201, 35.2057 ],
-		'营口' : [ 122.4316, 40.4297 ],
-		'葫芦岛' : [ 120.1575, 40.578 ],
-		'衡水' : [ 115.8838, 37.7161 ],
-		'衢州' : [ 118.6853, 28.8666 ],
-		'西宁' : [ 101.4038, 36.8207 ],
-		'西安' : [ 109.1162, 34.2004 ],
-		'贵阳' : [ 106.6992, 26.7682 ],
-		'连云港' : [ 119.1248, 34.552 ],
-		'邢台' : [ 114.8071, 37.2821 ],
-		'邯郸' : [ 114.4775, 36.535 ],
-		'郑州' : [ 113.4668, 34.6234 ],
-		'鄂尔多斯' : [ 108.9734, 39.2487 ],
-		'重庆' : [ 107.7539, 30.1904 ],
-		'金华' : [ 120.0037, 29.1028 ],
-		'铜川' : [ 109.0393, 35.1947 ],
-		'银川' : [ 106.3586, 38.1775 ],
-		'镇江' : [ 119.4763, 31.9702 ],
-		'长春' : [ 125.8154, 44.2584 ],
-		'长沙' : [ 113.0823, 28.2568 ],
-		'长治' : [ 112.8625, 36.4746 ],
-		'阳泉' : [ 113.4778, 38.0951 ],
-		'青岛' : [ 120.4651, 36.3373 ],
-		'韶关' : [ 113.7964, 24.7028 ]
+		"西北": [96.408, 40.432],
+		"华东": [120.178, 29.243],
+		"华北": [114.143, 40.769],
+		"华中": [113.628, 34.758],
+		"西南": [101.491, 29.694],
+		"华南": [113.187, 23.275],
+		"东北": [126.506, 43.507]
 	};
 
-	var ZZData = [
-		[
-			{name: '郑州'},
-			{name: '北京', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '上海', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '天津', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '重庆', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '哈尔滨', value: 95}
-		],[
-			{name: '郑州'},
-			{name: '长春', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '沈阳', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '呼和浩特', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '石家庄', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '乌鲁木齐', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '兰州', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '西宁', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '西安', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '银川', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '济南', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '太原', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '合肥', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '长沙', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '武汉', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '南京', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '成都', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '贵阳', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '昆明', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '南宁', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '拉萨', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '杭州', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '南昌', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '广州', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '福州', value: 95}
-		],
-		[
-			{name: '郑州'},
-			{name: '海口', value: 95}
+	var ZZData = data.map(function(item) {
+		return [
+			{name: '华中'},
+			item
 		]
-	];
-
-	var BJData = [ [ {
-		name : '北京'
-	}, {
-		name : '上海',
-		value : 95
-	} ], [ {
-		name : '北京'
-	}, {
-		name : '广州',
-		value : 90
-	} ], [ {
-		name : '北京'
-	}, {
-		name : '大连',
-		value : 80
-	} ], [ {
-		name : '北京'
-	}, {
-		name : '南宁',
-		value : 70
-	} ], [ {
-		name : '北京'
-	}, {
-		name : '南昌',
-		value : 60
-	} ], [ {
-		name : '北京'
-	}, {
-		name : '拉萨',
-		value : 50
-	} ], [ {
-		name : '北京'
-	}, {
-		name : '长春',
-		value : 40
-	} ], [ {
-		name : '北京'
-	}, {
-		name : '包头',
-		value : 30
-	} ], [ {
-		name : '北京'
-	}, {
-		name : '重庆',
-		value : 20
-	} ], [ {
-		name : '北京'
-	}, {
-		name : '常州',
-		value : 10
-	} ] ];
-
-	var planePath = 'path://M1705.06,1318.313v-89.254l-319.9-221.799l0.073-208.063c0.521-84.662-26.629-121.796-63.961-121.491c-37.332-0.305-64.482,36.829-63.961,121.491l0.073,208.063l-319.9,221.799v89.254l330.343-157.288l12.238,241.308l-134.449,92.931l0.531,42.034l175.125-42.917l175.125,42.917l0.531-42.034l-134.449-92.931l12.238-241.308L1705.06,1318.313z';
+	});
 
 	var convertData = function(data) {
-		console.log(data);
 		var res = [];
 		for (var i = 0; i < data.length; i++) {
 			var dataItem = data[i];
@@ -1301,9 +929,8 @@ function loadMap() {
 
 	var color = [ '#a6c84c', '#ffa022', '#46bee9' ];
 	var series = [];
-	[ [ '郑州', ZZData ] ].forEach(function(
+	[ [ '华中', ZZData ] ].forEach(function(
 			item, i) {
-		// console.log(item,i);
 		series.push({
 			name : item[0],
 			type : 'lines',
@@ -1313,13 +940,13 @@ function loadMap() {
 				period : 6,
 				trailLength : 0.7,
 				color : '#fff',
-				symbolSize : 3
+				symbolSize : 6
 			},
 			lineStyle : {
 				normal : {
 					color : '#fff',
 					width : 0,
-					curveness : 0.2
+					curveness : 0.3
 				}
 			},
 			data : convertData(item[1])
@@ -1328,7 +955,7 @@ function loadMap() {
 			type : 'lines',
 			zlevel : 2,
 			symbol : [ 'none', 'arrow' ],
-			symbolSize : 10,
+			symbolSize : 12,
 			effect : {
 				show : true,
 				period : 6,
@@ -1340,8 +967,8 @@ function loadMap() {
 				normal : {
 					color : '#fff',
 					width : 1,
-					opacity : 0.6,
-					curveness : 0.2
+					opacity : 0.8,
+					curveness : 0.3
 				}
 			},
 			data : convertData(item[1])
@@ -1351,41 +978,90 @@ function loadMap() {
 			coordinateSystem : 'geo',
 			zlevel : 2,
 			rippleEffect : {
-				brushType : 'stroke'
+				brushType : 'fill',
+				scale: 3.5
 			},
 			label : {
 				normal : {
 					show : true,
 					position : 'right',
-					formatter : '{b}'
+					fontSize: 14,
+					formatter : function(e) {
+						return e.name + '\n' + e.value[2]
+					}
 				}
 			},
 			symbolSize : function(val) {
-				return val[2] / 16;
+				var size = val[2] / 100;
+				if(size < 8) {
+					return 8;
+				} else if (size > 13) {
+					return 13;
+				} else {
+					return size;
+				}
 			},
 			itemStyle : {
 				normal : {
-					color : '#00FFFF'
+					color : function(e) {
+						switch(e.name)
+						{
+							case '东北':
+								return '#00FFFF';
+							default:
+								return '#00FFFF'
+						}
+					}
 				}
 			},
 			data : item[1].map(function(dataItem) {
+				var position = '';
+				switch(dataItem[1].name) {
+					case '西北':
+						position = [-27, -27];
+						break;
+					case '西南':
+						position = [-32, -10];
+						break;
+					case '华南':
+						position = [-20, 12];
+						break;
+					case '华东':
+						position = [-10, 13];
+						break;
+					case '华中':
+						position = [25, -13];
+						break;
+					case '华北':
+						position = [-5, -35];
+						break;
+					case '东北':
+						position = [13, -17];
+						break;
+					default:
+						position = 'right';
+					break;
+				}
 				return {
 					name : dataItem[1].name,
 					value : geoCoordMap[dataItem[1].name]
-							.concat([ dataItem[1].value ])
+							.concat([ dataItem[1].value ]),
+					label: {
+						normal : {
+							position : position
+						}
+					}
 				};
 			})
 		});
 	});
-	console.log(series)
 
-	option = {
+	var option = {
 		tooltip : {
 			trigger : 'item',
 			formatter : function(params, ticket, callback) {
-				console.log(params);
 				if (params.seriesType == "effectScatter") {
-					return "线路：" + params.data.name + "" + params.data.value[2];
+					return params.data.name + "" + params.data.value[2];
 				} else if (params.seriesType == "lines") {
 					return params.data.fromName + ">" + params.data.toName
 							+ "<br />" + params.data.value;
@@ -1393,16 +1069,6 @@ function loadMap() {
 					return params.name;
 				}
 			}
-		},
-		legend : {
-			orient : 'vertical',
-			top : 'bottom',
-			left : 'right',
-			data : [ '北京 Top10', '上海 Top10', '广州 Top10' ],
-			textStyle : {
-				color : '#fff'
-			},
-			selectedMode : 'multiple',
 		},
 
 		geo : {
@@ -1414,20 +1080,13 @@ function loadMap() {
 				}
 			},
 			roam : true,
+			zoom: 1,
+			center: [108.5, 34.2],
 			itemStyle : {
 				normal : {
-					// areaColor : new echarts.graphic.LinearGradient(0, 0, 1, 0,
-					// 		[ {
-					// 			offset : 0,
-					// 			color : 'rgba(18, 34, 67,0.7)'
-					// 		}, {
-					// 			offset : 1,
-					// 			color : 'rgba(21, 40, 81,0.7)'
-					// 		} ]),
-					areaColor: 'rgba(18, 34, 67,0.7)',
+					areaColor: 'rgba(39, 88, 156,0.6)',
 					borderColor : '#328CFF',
-					shadowBlur: 100,
-					// shadowColor: '#328CFF'
+					shadowBlur: 100
 				},
 				emphasis : {
 					areaColor : new echarts.graphic.LinearGradient(0, 0, 1, 0,
@@ -1447,8 +1106,49 @@ function loadMap() {
 		series : series
 	};
 
-	myChart.setOption(option);
+	chart8.setOption(option);
+
+	chart8.on('click', function(e) {
+		var name = e.name;
+		if(e.componentSubType === 'effectScatter') {
+			$.ajax({
+				async: true,
+				url: './data/data.json',
+				type: 'GET',
+				dataType: 'text',
+				success: function(result) {
+					var data = JSON.parse(result);
+					for(var key in data) {
+						if(key === name) {
+							reloadChart1(data[key]);
+							reloadChart2(data[key]);
+							reloadChart3(data[key]);
+							reloadChart4(data[key]);
+                            $('.map-title > ul > li:nth-child(2)').hide();
+                            $('.map-title ul li').css('width', '50%');
+							$('.map-title > ul > li:nth-child(1) > div > span:nth-child(3)').html(data[key].saler);
+                            $('.map-title > ul > li:nth-child(3) > div > span:nth-child(3)').html(data[key].sum);
+                            $('.return').show();
+                            status = 'district';
+						}
+					}
+				},
+				error: function(err) {
+					console.log('请求失败！')
+				}
+			});
+		}
+	});
 }
+$('.return').click(function() {
+	status = 'country';
+    $('.map-title > ul > li:nth-child(2)').show();
+    $('.map-title ul li').css('width', '33%');
+//    $('.map-title > ul > li:nth-child(1) > div > span:nth-child(3)').html('351');
+//    $('.map-title > ul > li:nth-child(3) > div > span:nth-child(3)').html('6286');
+    $('.return').hide();
+    loadCountry();
+});
 
 function timeTicker() {
 	setInterval(function() {
@@ -1465,13 +1165,169 @@ function timeTicker() {
 	}, 1000);
 }
 
-loadChart1();
-loadChart2();
-loadChart3();
-loadChart4();
-loadChart5();
-loadChart6();
-timeTicker();
-loadChart7();
-loadMap();
+function pathDataToString(path) {
+	var CMD$4 = {"M":1,"L":2,"C":3,"Q":4,"A":5,"Z":6,"R":7};
+	var mathSin$3 = Math.sin;
+	var mathCos$3 = Math.cos;
+	var mathRound = Math.round;
+	var PI$5 = Math.PI;
+	var PI2$7 = Math.PI * 2;
+	var degree = 180 / PI$5;
+	var EPSILON$4 = 1e-4;
+	function round4(val) {
+		return mathRound(val * 1e4) / 1e4;
+	}
+	function isAroundZero$1(val) {
+		return val < EPSILON$4 && val > -EPSILON$4;
+	}
+	var str = [];
+	var data = path.data;
+	var dataLength = path.len();
+	for (var i = 0; i < dataLength;) {
+		var cmd = data[i++];
+		var cmdStr = '';
+		var nData = 0;
+		switch (cmd) {
+			case CMD$4.M:
+				cmdStr = 'M';
+				nData = 2;
+				break;
+			case CMD$4.L:
+				cmdStr = 'L';
+				nData = 2;
+				break;
+			case CMD$4.Q:
+				cmdStr = 'Q';
+				nData = 4;
+				break;
+			case CMD$4.C:
+				cmdStr = 'C';
+				nData = 6;
+				break;
+			case CMD$4.A:
+				var cx = data[i++];
+				var cy = data[i++];
+				var rx = data[i++];
+				var ry = data[i++];
+				var theta = data[i++];
+				var dTheta = data[i++];
+				var psi = data[i++];
+				var clockwise = data[i++];
 
+				var dThetaPositive = Math.abs(dTheta);
+				var isCircle = isAroundZero$1(dThetaPositive - PI2$7)
+					&& !isAroundZero$1(dThetaPositive);
+
+				var large = false;
+				if (dThetaPositive >= PI2$7) {
+					large = true;
+				}
+				else if (isAroundZero$1(dThetaPositive)) {
+					large = false;
+				}
+				else {
+					large = (dTheta > -PI$5 && dTheta < 0 || dTheta > PI$5)
+						=== !!clockwise;
+				}
+
+				var x0 = round4(cx + rx * mathCos$3(theta));
+				var y0 = round4(cy + ry * mathSin$3(theta));
+
+				// It will not draw if start point and end point are exactly the same
+				// We need to shift the end point with a small value
+				// FIXME A better way to draw circle ?
+				if (isCircle) {
+					if (clockwise) {
+						dTheta = PI2$7 - 1e-4;
+					}
+					else {
+						dTheta = -PI2$7 + 1e-4;
+					}
+
+					large = true;
+
+					if (i === 9) {
+						// Move to (x0, y0) only when CMD.A comes at the
+						// first position of a shape.
+						// For instance, when drawing a ring, CMD.A comes
+						// after CMD.M, so it's unnecessary to move to
+						// (x0, y0).
+						str.push('M', x0, y0);
+					}
+				}
+
+				var x = round4(cx + rx * mathCos$3(theta + dTheta));
+				var y = round4(cy + ry * mathSin$3(theta + dTheta));
+
+				// FIXME Ellipse
+				str.push('A', round4(rx), round4(ry),
+					mathRound(psi * degree), +large, +clockwise, x, y);
+				break;
+			case CMD$4.Z:
+				cmdStr = 'Z';
+				break;
+			case CMD$4.R:
+				var x = round4(data[i++]);
+				var y = round4(data[i++]);
+				var w = round4(data[i++]);
+				var h = round4(data[i++]);
+				str.push(
+					'M', x, y,
+					'L', x + w, y,
+					'L', x + w, y + h,
+					'L', x, y + h,
+					'L', x, y
+				);
+				break;
+		}
+		cmdStr && str.push(cmdStr);
+		for (var j = 0; j < nData; j++) {
+			// PENDING With scale
+			str.push(round4(data[i++]));
+		}
+	}
+	return str.join(' ');
+}
+
+//loadChart1();
+//loadChart2();
+//loadChart3();
+//loadChart4();
+//loadChart5();
+//loadChart6();
+timeTicker();
+//loadChart7();
+//loadMap();
+
+function loadCountry() {
+	$.ajax({
+		url: './data/countryData.json',
+		dataType: 'text',
+		success: function(result) {
+			var data = JSON.parse(result);
+			
+			loadTitle(data["title"]);
+			loadChart1(data["chart1"]);
+			loadChart2(data["chart2"]);
+			loadChart3(data["chart3"]);
+			loadChart4(data["chart4"]);
+			loadChart5(data["chart5"]);
+			loadChart6(data["chart6"]);
+			loadChart7(data["chart7"]);
+			loadMap(data["mapData"]);
+		},
+		error: function(msg) {
+			console.log('请求失败！');
+		}
+	});
+}
+
+loadCountry();
+globalInterval = setInterval(function() {
+	if(status === 'country') {
+		loadCountry();
+	}
+	if(status === 'district') {
+		
+	}
+}, 1000*60);

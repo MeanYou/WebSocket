@@ -1,0 +1,195 @@
+{
+	"title": {
+		"saler": 351,
+		"selfSupprotHall": 3,
+		"sale": 6286
+	},
+	"chart1": {
+		"finishedData": [{
+			"name": "华中",
+			"value": 4399
+		}, {
+			"name": "华北",
+			"value": 1023
+		}, {
+			"name": "华东",
+			"value": 322
+		}, {
+			"name": "西北",
+			"value": 159
+		}, {
+			"name": "西南",
+			"value": 135
+		}, {
+			"name": "华南",
+			"value": 132
+		}, {
+			"name": "东北",
+			"value": 106
+		}],
+		"unfinishedData": [{
+			"name": "华中",
+			"value": 0
+		}, {
+			"name": "华北",
+			"value": 0
+		}, {
+			"name": "华东",
+			"value": 0
+		}, {
+			"name": "西北",
+			"value": 0
+		}, {
+			"name": "西南",
+			"value": 0
+		}, {
+			"name": "华南",
+			"value": 0
+		}, {
+			"name": "东北",
+			"value": 4
+		}]
+	},
+	"chart2": {
+		"rank": [{
+			"name": "大众朗逸",
+			"sale": 471
+		}, {
+			"name": "别克英朗",
+			"sale": 346
+		}, {
+			"name": "起亚K3",
+			"sale": 283
+		}, {
+			"name": "帕萨特",
+			"sale": 176
+		}, {
+			"name": "华晨中华",
+			"sale": 119
+		}, {
+			"name": "大众捷达",
+			"sale": 110
+		}, {
+			"name": "大众宝来",
+			"sale": 101
+		}, {
+			"name": "吉利帝豪",
+			"sale": 72
+		}, {
+			"name": "本田雅阁",
+			"sale": 70
+		}, {
+			"name": "丰田雷凌",
+			"sale": 52
+		}]
+	},
+	"chart3": {
+		"rendData": [{
+			"name": "华中",
+			"value": 2819
+		}, {
+			"name": "华北",
+			"value": 643
+		}, {
+			"name": "华东",
+			"value": 209
+		}, {
+			"name": "西北",
+			"value": 98
+		}, {
+			"name": "西南",
+			"value": 79
+		}],
+		"fullData": [{
+			"name": "华中",
+			"value": 1580
+		}, {
+			"name": "华北",
+			"value": 380
+		}, {
+			"name": "华东",
+			"value": 123
+		}, {
+			"name": "西北",
+			"value": 61
+		}, {
+			"name": "西南",
+			"value": 56
+		}]
+	},
+	"chart4": [{
+		"name": "华中",
+		"percent": 98
+	}, {
+		"name": "华北",
+		"percent": 96
+	}, {
+		"name": "华东",
+		"percent": 92
+	}, {
+		"name": "华南",
+		"percent": 90
+	}, {
+		"name": "西南",
+		"percent": 89
+	}, {
+		"name": "西北",
+		"percent": 87
+	}, {
+		"name": "东北",
+		"percent": 85
+	}],
+	"chart5": [{
+		"name": "华中",
+		"value": 357
+	}, {
+		"name": "华北",
+		"value": 89
+	}, {
+		"name": "华东",
+		"value": 82
+	}, {
+		"name": "华南",
+		"value": 62
+	}, {
+		"name": "西南",
+		"value": 48
+	}, {
+		"name": "西北",
+		"value": 27
+	}, {
+		"name": "东北",
+		"value": 20
+	}],
+	"chart6": {
+		"positive": 221,
+		"neutral": 43,
+		"negative": 2
+	},
+	"chart7": {
+		"fullSale": [31, 35, 19, 26, 32, 29, 34, 32],
+		"stageSale": [19, 21, 16, 24, 23, 28, 36, 33]
+	},
+	"mapData": [{
+		"name": "西北",
+		"value": 159
+	}, {
+		"name": "华东",
+		"value": 332
+	}, {
+		"name": "华北",
+		"value": 1023
+	}, {
+		"name": "华南",
+		"value": 132
+	}, {
+		"name": "西南",
+		"value": 135
+	}, {
+		"name": "东北",
+		"value": 106
+	}, {
+		"name": "华中",
+		"value": 4399
+	}]
+}
